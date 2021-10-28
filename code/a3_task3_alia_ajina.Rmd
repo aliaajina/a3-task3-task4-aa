@@ -43,15 +43,37 @@ Create a finalized, faceted histogram comparing the distribution of sizes betwee
 
 ```{r}
 ggplot(data = urchins_clean, aes(x = size)) +
-  geom_histogram(aes(fill = common_name), bins = 10) + 
+  geom_histogram(aes(fill = common_name, color = common_name), bins = 10) + 
   facet_wrap(~ common_name) + 
+  scale_color_manual(values = c("gray", "gray")) +
+  scale_fill_manual(values = c("#CBC3E3", "#801B1B")) +
   theme_minimal() + 
   theme(axis.title.x = element_text(hjust = 0.5, vjust = 0.5),
         plot.title = element_text(hjust = .5), 
-        plot.subtitle = element_text(hjust = .5)) +
+        plot.subtitle = element_text(hjust = .5),
+        plot.caption = element_text(hjust = .3)) +
   labs( x = "Urchin Diameter (cm)",
         y = "Number of Urchins",
         title = "Distribution of Sizes between Red and Purple Urchins (AJINA)",
         subtitle = "Santa Barbara Coastal Long Term Ecological Research", 
         caption = "Figure 1: Distribution of sizes between purple and red sea urchins at five different sites along the Santa Barbara Coast." )
 ```
+
+## Summary Statistics
+
+Summary table of statistics for purple and red urchins including mean, median, standard deviation, and sample size.
+
+```{r}
+urchins_summary <- urchins_clean %>% 
+  group_by(common_name) %>% 
+  summarize(mean = round(mean(size), 1), 
+            sd = round(sd(size), 1),
+            median = median(size),
+            sample_size = n())
+
+kable(urchins_summary) %>% 
+  kable_styling()
+
+
+```
+
