@@ -45,7 +45,7 @@ Create a finalized, faceted histogram comparing the distribution of sizes betwee
 ggplot(data = urchins_clean, aes(x = size)) +
   geom_histogram(aes(fill = common_name, color = common_name), bins = 10) + 
   facet_wrap(~ common_name) + 
-  scale_color_manual(values = c("gray", "gray")) +
+  scale_color_manual(values = c("white", "white")) +
   scale_fill_manual(values = c("#CBC3E3", "#801B1B")) +
   theme_minimal() + 
   theme(axis.title.x = element_text(hjust = 0.5, vjust = 0.5),
@@ -71,8 +71,15 @@ urchins_summary <- urchins_clean %>%
             median = median(size),
             sample_size = n())
 
-kable(urchins_summary) %>% 
-  kable_styling()
+urchins_summary %>% 
+  kable(col.names = c("Common Name", 
+                      "Mean Size (cm)",
+                      "Median Size (cm)",
+                      "Standard Deviation (cm)",
+                      "Sample Size"),
+        caption = "<center> Table 1: Summary Statistics of Purple and Red Urchins<center>") %>% 
+  kable_styling(bootstrap_options = "bordered",
+                full_width = F, position = "center")
 
 
 ```
