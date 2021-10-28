@@ -47,16 +47,17 @@ ggplot(data = urchins_clean, aes(x = size)) +
   facet_wrap(~ common_name) + 
   scale_color_manual(values = c("white", "white")) +
   scale_fill_manual(values = c("#CBC3E3", "#801B1B")) +
-  theme_minimal() + 
+  theme_gray() + 
   theme(axis.title.x = element_text(hjust = 0.5, vjust = 0.5),
         plot.title = element_text(hjust = .5), 
         plot.subtitle = element_text(hjust = .5),
-        plot.caption = element_text(hjust = .3)) +
+        plot.caption = element_text(hjust = .3),
+        legend.position = "none") +
   labs( x = "Urchin Diameter (cm)",
         y = "Number of Urchins",
         title = "Distribution of Sizes between Red and Purple Urchins (AJINA)",
         subtitle = "Santa Barbara Coastal Long Term Ecological Research", 
-        caption = "Figure 1: Distribution of sizes between purple and red sea urchins at five different sites along the Santa Barbara Coast." )
+        caption = "Figure 1: Distribution of sizes between purple and red sea urchins at five different sites along the Santa Barbara Coast.")
 ```
 
 ## Summary Statistics
