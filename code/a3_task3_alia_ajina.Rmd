@@ -1,30 +1,57 @@
 ---
-title: "a3_task3_alia_ajina"
+title: "Assignment 3 Task 3: Santa Barbara Urchins "
 author: "Alia Ajina"
 date: "10/28/2021"
 output: html_document
 ---
 
+## Overview
+This code uses version control, project management, data wrangling, analysis, and visualization skills to explore red and purple urchin records from the Santa Barbara Coastal Long Term Ecological Research (SBC LTER) program's divers. The data is from a long-term experiment on kelp removal and the sea urchin (red and purple) size frequency distribution.
+
+Data Citation: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 20. Environmental Data Initiative. https://doi.org/10.6073/pasta/5a1e9ef03aa47bd2225c0bb98a02a63b. 
+
+## Setup
+
+Attach tidyverse, here, janitor, and kableExtra packages.
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = FALSE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(kableExtra)
 ```
 
-## R Markdown
+## Reach in Urchins data
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r, Read in Data}
+urchins <- read_csv(here("data", "urchins.csv"))
 ```
 
-## Including Plots
+## Data Wrangling
 
-You can also embed plots, for example:
+Clean the data
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+urchins_clean <- urchins %>% 
+  clean_names()
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Data Visualization
+
+Create a finalized, faceted histogram comparing the distribution of sizes between purple and red sea urchins.
+
+```{r}
+ggplot(data = urchins_clean, aes(x = size)) +
+  geom_histogram(aes(fill = common_name), bins = 10) + 
+  facet_wrap(~ common_name) + 
+  theme_minimal() + 
+  theme(axis.title.x = element_text(hjust = 0.5, vjust = 0.5),
+        plot.title = element_text(hjust = .5), 
+        plot.subtitle = element_text(hjust = .5)) +
+  labs( x = "Urchin Diameter (cm)",
+        y = "Number of Urchins",
+        title = "Distribution of Sizes between Red and Purple Urchins (AJINA)",
+        subtitle = "Santa Barbara Coastal Long Term Ecological Research", 
+        caption = "Figure 1: Distribution of sizes between purple and red sea urchins at five different sites along the Santa Barbara Coast." )
+```
