@@ -16,6 +16,7 @@ Attach tidyverse, here, janitor, and kableExtra packages.
 
 ```{r setup, include=TRUE, message = FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
 library(tidyverse)
 library(here)
 library(janitor)
@@ -45,6 +46,7 @@ urchins_clean <- urchins %>%
 Create a finalized, faceted histogram comparing the distribution of sizes between purple and red sea urchins.
 
 ```{r}
+# Plot histogram and change formatting accordingly
 ggplot(data = urchins_clean, aes(x = size)) +
   geom_histogram(aes(fill = common_name, color = common_name), bins = 10) + 
   facet_wrap(~ common_name) + # Facet wrap by "common_name"
@@ -60,7 +62,8 @@ ggplot(data = urchins_clean, aes(x = size)) +
         y = "Number of Urchins",
         title = "Distribution of Sizes between Red and Purple Urchins (AJINA)",
         subtitle = "Santa Barbara Coastal Long Term Ecological Research", 
-        caption = "Figure 1: Distribution of sizes between purple and red sea urchins at five different sites along the Santa Barbara Coast.")
+        caption = "Figure 1: Distribution of sizes between purple and red sea urchins at five different sites 
+        along the Santa Barbara Coast.")
 ```
 
 ## Summary Statistics
@@ -68,6 +71,8 @@ ggplot(data = urchins_clean, aes(x = size)) +
 Summary table of statistics for purple and red urchins including mean, median, standard deviation, and sample size. Use KableExtra to finalize the table.
 
 ```{r}
+# Create a summary statistics table
+
 urchins_summary <- urchins_clean %>% 
   group_by(common_name) %>% 
   summarize(mean = round(mean(size), 2), 
@@ -98,10 +103,13 @@ The summary statistics for red and purple sea urchins allows us to see that red 
 Create a new subset of data, purple_urchins, convert the date column to the class "Date", create a new column that only contains the year, and and create another new column called site_full that contains the full name of the five sites, not just their abbreviation.
 
 ```{r}
+# Create new subset
 purple_urchins <- urchins_clean %>% 
+# Convert date column to class "Date"
   filter(common_name == "Purple Urchin") %>% 
-  mutate(date = mdy(date)) %>% 
+  mutate(date = mdy(date)) %>%
   mutate(year = year(date)) %>% 
+# Create new column with full site names
   mutate(site_full = case_when(site == "NAPL" ~ "Naples Reef", 
                                site == "AQUE" ~ "Arroyo Quemado Reef",
                                site == "CARP" ~ "Carpinteria Reef",
@@ -112,6 +120,8 @@ purple_urchins <- urchins_clean %>%
 ### Table of Purple Urchins observed by site and year.
 
 ```{r}
+# Create table
+
 total_purple_urchins <- purple_urchins %>% 
   group_by(site_full, year) %>% 
   summarize(count=n())
@@ -124,19 +134,24 @@ Two finalized graphs of counts of purple urchins recorded at each site over time
 ### Bar Graph of Purple Urchin Distribution per Year by Site
 
 ```{r}
+# Create bar graph
 ggplot(data = total_purple_urchins, 
        aes(x = year, y = count)) +
+# Change aesthetics accordingly
   geom_col(aes(color = site_full, fill = site_full)) +
   facet_wrap(~ site_full, scale = 'free') + # Facet wrap by "site_full" and change scale to free in order to have an x and y axis on each individual plot
   scale_color_manual(values = c("white", "white", "white", "white", "white")) +
-  scale_fill_manual(values = c("#B7E9F7", "#90EE90", "#F4F186", "#FED8B1", "#FFB6C1")) +
+  scale_fill_manual(values = c("#B7E9F7", "#90EE90", "#F4F186", "#FED8B1", "#FFB6C1")) + # Change colors of faceted histograms and their outline for better visuals
   theme_gray() + 
-  scale_x_continuous(limits=c(2007,2020), breaks = c(2008, 2010, 2012, 2014, 2016, 2018, 2020)) + 
+  scale_x_continuous(limits=c(2007,2020), 
+                     breaks = c(2008, 2010, 2012, 2014, 2016, 2018, 2020)) + 
   scale_y_continuous(limits=c(0,1200)) + # Add limits to the scales in order to keep the axis the same
   labs( x = "Year",
         y = "Number of Purple Urchins",
         title = " Distribution of Purple Urchins from 2008 - 2020 by site (AJINA)",
-        caption = "Figure 1.1: Distribution of purple sea urchins in each site from the years 2008 to 2020 from SBC LTER data") +
+        caption = "Figure 1.1: Distribution of purple sea urchins in each site from the years 2008 to 2020 from 
+        SBC LTER data") +
+# Adjust positioning
   theme(axis.text.x = element_text(size = 6, hjust = 0.6, angle = 50),
         axis.text.y = element_text(size = 6),
         axis.title.x = element_text(hjust = 0.5, 
@@ -150,19 +165,22 @@ ggplot(data = total_purple_urchins,
 ### Line graph of Purple Urchin Distribution per Year by Site
 
 ```{r}
+# Create line graph
 ggplot(data = total_purple_urchins, 
        aes(x = year, y = count)) + 
-  geom_line(aes(color = site_full, scale = 'free')) +
-  scale_color_manual(values = c("#B7E9F7", "#90EE90", "#F4F186", "#FED8B1", "#FFB6C1")) +
-  theme_minimal() +  
-  scale_x_continuous(limits=c(2007,2020), breaks = c(2008, 2010, 2012, 2014, 2016, 2018, 2020)) + 
-  scale_y_continuous(limits = c(0,1200)) +
+  geom_line(aes(color = site_full)) + # Adjust aesthetics and visuals according to preferences
+  scale_color_manual(values = c("#B7E9F7", "#90EE90", "#F4F186", "#FED8B1", "#FFB6C1")) + # Change colors of line
+  theme_minimal() +  # add breaks to the scale in order to have uniform x and y axis
+  scale_x_continuous(breaks = c(2008, 2010, 2012, 2014, 2016, 2018, 2020)) +
+  scale_y_continuous(breaks = c(0, 250, 500, 750, 1000, 1250, 1500)) +
   labs( x = "Year",
         y = "Number of Purple Urchins",
         title = " Distribution of Purple Urchins from 2008 - 2020 by site (AJINA)",
-        caption = "Figure 1.1: Distribution of purple sea urchins in each site from the years 2008 to 2020 from SBC LTER data",
+        caption = "Figure 1.1: Distribution of purple sea urchins in each site from the years 
+        2008 to 2020 from SBC LTER data",
         color = "Site Location",
         Key = "Site") +
+# Adjust placement/orientation of text 
   theme(axis.text.x = element_text(size = 6, hjust = 0.6),
         axis.text.y = element_text(size = 6),
         axis.title.x = element_text(hjust = 0.5, 

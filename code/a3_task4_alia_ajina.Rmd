@@ -1,0 +1,126 @@
+---
+title: "Assignment 3 Task 4"
+subtitle: "Analysis of Size Distribution of Purple Sea Urchins at Naples Reef in 2010 between Treatment Groups"
+author: "Alia Ajina"
+date: "10/29/2021"
+output: html_document
+---
+
+## Overview
+This code wrangles and then visualizes data on purple sea urchin records at Naples Reef in 2010 from the Santa Barbara Coastal Long Term Ecological Research (SBC LTER) program. The data is from a long-term experiment on kelp removal and sea urchin size frequency distribution.
+
+Data Citation: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 20. Environmental Data Initiative. https://doi.org/10.6073/pasta/5a1e9ef03aa47bd2225c0bb98a02a63b. 
+
+## Setup
+
+Attach tidyverse, here, janitor, and kableExtra packages.
+
+```{r setup, include=TRUE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(kableExtra)
+library(lubridate)
+```
+
+## Read in Urchins data
+
+```{r, Read in Data}
+urchins <- read_csv(here("data", "urchins.csv"))
+```
+
+## Data Wrangling
+
+Create subset of data that only included observations from Naples Reef for purple sea urchins from 2010.
+
+```{r}
+# Create subset
+purple_urchins_2010_NAPL <- urchins %>% 
+  clean_names() %>% # Clean the data
+  filter(common_name == "Purple Urchin") %>% # Wrangle data to include only observations for Naples Reef from 2010 for "Purple Urchin"
+  filter(site == "NAPL") %>% 
+  mutate(date = mdy(date)) %>% 
+  mutate(year = year(date)) %>% 
+  filter(year == "2010")
+```
+
+
+
+## Data Visualization
+
+Exploring histogram and QQ-plots for purple urchin size distributions separated by treatment at Naples Reef in 2010. 
+
+```{r}
+# Create Histogram comparing annual and control treatments
+ggplot(data = purple_urchins_2010_NAPL, 
+       aes(x = size)) +
+  geom_histogram(aes(fill = treatment, color = treatment), 
+                 bins = 10) +
+  # Preference of themes and aesthetics applied
+  scale_color_manual(values = c("white", "white")) +
+  scale_fill_manual(values = c("#301934", "#B19CD9")) +
+  facet_wrap(~ treatment) +
+  theme_minimal() + 
+  labs(x = "Size (cm)",
+       y = "Count",
+       title = "Comparison of Size Distribution for Purple Urchins of Different Treatment Groups (AJINA)",
+       subtitle = "Naples Reef, 2010") +
+# Adjust orientation of text
+  theme(axis.title.x = element_text(hjust = 0.5, vjust = 0.5),
+        plot.title = element_text(hjust = .9), 
+        plot.subtitle = element_text(hjust = .5),
+        plot.caption = element_text(hjust = .3),
+        legend.position = "none") 
+
+# Create QQ-plot comparing annual and control treatments
+ggplot(data = purple_urchins_2010_NAPL, aes(sample = size)) + 
+  geom_qq(aes(color = treatment)) +
+  facet_wrap(~ treatment) +
+  stat_qq_line(linetype = "dashed") +
+  # Preference of themes and aesthetics applied
+  theme_minimal() + 
+  scale_color_manual(values = c("#301934", "#B19CD9")) +
+  labs(y = "Size (cm)",
+       x = "Theoretical Quantiles",
+       title = "QQ-plot Comparison of Size Distribution for Purple Urchins of Different Treatment Groups (AJINA)",
+       subtitle = "Naples Reef, 2010") +
+# Adjust orientation of text
+  theme(axis.title.x = element_text(hjust = 0.5, vjust = 0.5),
+        plot.title = element_text(hjust = 0.5, size = 11), 
+        plot.subtitle = element_text(hjust = .5, size = 10),
+        plot.caption = element_text(hjust = .3),
+        legend.position = "none") 
+```
+
+After analyzing the graphs of the two treatment groups, "annual" and "control", it is evident that the data is slightly positively skewed. The positive outliers are skewing the distribution from normal to a right skew. This tendency is more evident in the "annual" group than the "control" group, but is still apparent in both treatment groups. This inclination in made visible in both the histogram and the QQ-plot, although it is slightly easier to notice in the histogram. The QQ-plot allows us to visualize a non-normal distribution of the data through the dotted reference line.
+
+
+## Summary Statistics
+
+Summarize the data and create a summary table with kableExtra.
+
+```{r}
+# Create table of summary stats
+purple_urchins_2010_NAPL_sum <- purple_urchins_2010_NAPL %>% 
+  group_by(treatment) %>% 
+  summarise(mean = round(mean(size), 2), 
+            median = median(size), 
+            sd = round(sd(size), 2), 
+            count = n())
+
+# Use kableExtra to finalize table
+ 
+purple_urchins_2010_NAPL_sum %>% 
+kable(col.names = c("Treatment", 
+                      "Mean Size (cm)",
+                      "Median Size (cm)",
+                      "Standard Deviation (cm)",
+                      "Sample Size"),
+        caption = "<center>Table 1: Summary Statistics of Purple Sea Urchins at Naples Reef in 2010<center>") %>% 
+  kable_styling(bootstrap_options = "bordered",
+                full_width = FALSE, position = "center")
+  
+```
+
+The summary statistics provide further evidence of what is visualized in the graphs. The differences between median, mean, and standard deviation are not extensive. The sample sizes of the two sets are also very similar. In order to further understand the distribution of data between the two treatment groups more analysis is suggested.
