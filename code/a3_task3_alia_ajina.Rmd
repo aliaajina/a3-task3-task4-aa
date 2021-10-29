@@ -5,17 +5,17 @@ date: "10/28/2021"
 output: html_document
 ---
 
-## Overview
+# Overview
 This code uses version control, project management, data wrangling, analysis, and visualization skills to explore red and purple urchin records from the Santa Barbara Coastal Long Term Ecological Research (SBC LTER) program's divers. The data is from a long-term experiment on kelp removal and the sea urchin (red and purple) size frequency distribution.
 
 Data Citation: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 20. Environmental Data Initiative. https://doi.org/10.6073/pasta/5a1e9ef03aa47bd2225c0bb98a02a63b. 
 
-## Setup
+# Setup
 
 Attach tidyverse, here, janitor, and kableExtra packages.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = FALSE)
+```{r setup, include=TRUE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(here)
 library(janitor)
@@ -25,7 +25,7 @@ library(lubridate)
 
 # Section 1
 
-## Reach in Urchins data
+## Read in Urchins data
 
 ```{r, Read in Data}
 urchins <- read_csv(here("data", "urchins.csv"))
@@ -47,7 +47,7 @@ Create a finalized, faceted histogram comparing the distribution of sizes betwee
 ```{r}
 ggplot(data = urchins_clean, aes(x = size)) +
   geom_histogram(aes(fill = common_name, color = common_name), bins = 10) + 
-  facet_wrap(~ common_name) + 
+  facet_wrap(~ common_name) + # Facet wrap by "common_name"
   scale_color_manual(values = c("white", "white")) +
   scale_fill_manual(values = c("#CBC3E3", "#801B1B")) +
   theme_gray() + 
@@ -65,15 +65,17 @@ ggplot(data = urchins_clean, aes(x = size)) +
 
 ## Summary Statistics
 
-Summary table of statistics for purple and red urchins including mean, median, standard deviation, and sample size.
+Summary table of statistics for purple and red urchins including mean, median, standard deviation, and sample size. Use KableExtra to finalize the table.
 
 ```{r}
 urchins_summary <- urchins_clean %>% 
   group_by(common_name) %>% 
-  summarize(mean = round(mean(size), 1), 
-            sd = round(sd(size), 1),
+  summarize(mean = round(mean(size), 2), 
             median = median(size),
+            sd = round(sd(size), 1),
             sample_size = n())
+
+# Use KableExtra to finalize the table
 
 urchins_summary %>% 
   kable(col.names = c("Common Name", 
@@ -87,7 +89,7 @@ urchins_summary %>%
 
 
 ```
-Paragraph here about overall takeaways about how the size compare between the two species...
+The summary statistics for red and purple sea urchins allows us to see that red sea urchins are slightly larger than the purple urchins, at 2.3 cm larger on average leading to a 41% difference in mean urchin diameter between the two. The purple sea urchins have a smaller standard deviation and a mean and median that are nearly the same. In comparison to red sea urchins, this concludes that purple sea urchin data has less spread than red sea urchin data.
 
 # Section 2
 
@@ -113,36 +115,61 @@ purple_urchins <- urchins_clean %>%
 total_purple_urchins <- purple_urchins %>% 
   group_by(site_full, year) %>% 
   summarize(count=n())
-
-total_purple_urchins
 ```
 
 ## Data Visualization
 
-A finalized graph of counts of purple urchins recorded at each site over time for the years included in the study.
+Two finalized graphs of counts of purple urchins recorded at each site over time for the years included in the study visualized in both a bar graph and a line graph for optimal comparison.
+
+### Bar Graph of Purple Urchin Distribution per Year by Site
 
 ```{r}
 ggplot(data = total_purple_urchins, 
        aes(x = year, y = count)) +
   geom_col(aes(color = site_full, fill = site_full)) +
-  facet_wrap(~ site_full) + 
+  facet_wrap(~ site_full, scale = 'free') + # Facet wrap by "site_full" and change scale to free in order to have an x and y axis on each individual plot
   scale_color_manual(values = c("white", "white", "white", "white", "white")) +
   scale_fill_manual(values = c("#B7E9F7", "#90EE90", "#F4F186", "#FED8B1", "#FFB6C1")) +
-  theme_gray() +
+  theme_gray() + 
+  scale_x_continuous(limits=c(2007,2020), breaks = c(2008, 2010, 2012, 2014, 2016, 2018, 2020)) + 
+  scale_y_continuous(limits=c(0,1200)) + # Add limits to the scales in order to keep the axis the same
   labs( x = "Year",
-        y = "Number of Urchins",
-        title = " Distribution of Purple Urchins from 2008 - (AJINA)",
-        subtitle = "", 
-        key = "Site",
-        fill = "Site",
-        caption = "") +
+        y = "Number of Purple Urchins",
+        title = " Distribution of Purple Urchins from 2008 - 2020 by site (AJINA)",
+        caption = "Figure 1.1: Distribution of purple sea urchins in each site from the years 2008 to 2020 from SBC LTER data") +
   theme(axis.text.x = element_text(size = 6, hjust = 0.6, angle = 50),
         axis.text.y = element_text(size = 6),
         axis.title.x = element_text(hjust = 0.5, 
                                     vjust = 0.5),
         plot.title = element_text(hjust = .5), 
         plot.subtitle = element_text(hjust = .5),
-        plot.caption = element_text(hjust = .3), 
+        plot.caption = element_text(hjust = .2), 
         legend.position = "none")
 ```
 
+### Line graph of Purple Urchin Distribution per Year by Site
+
+```{r}
+ggplot(data = total_purple_urchins, 
+       aes(x = year, y = count)) + 
+  geom_line(aes(color = site_full, scale = 'free')) +
+  scale_color_manual(values = c("#B7E9F7", "#90EE90", "#F4F186", "#FED8B1", "#FFB6C1")) +
+  theme_minimal() +  
+  scale_x_continuous(limits=c(2007,2020), breaks = c(2008, 2010, 2012, 2014, 2016, 2018, 2020)) + 
+  scale_y_continuous(limits = c(0,1200)) +
+  labs( x = "Year",
+        y = "Number of Purple Urchins",
+        title = " Distribution of Purple Urchins from 2008 - 2020 by site (AJINA)",
+        caption = "Figure 1.1: Distribution of purple sea urchins in each site from the years 2008 to 2020 from SBC LTER data",
+        color = "Site Location",
+        Key = "Site") +
+  theme(axis.text.x = element_text(size = 6, hjust = 0.6),
+        axis.text.y = element_text(size = 6),
+        axis.title.x = element_text(hjust = 0.5, 
+                                    vjust = 0.5),
+        plot.title = element_text(hjust = .5), 
+        plot.subtitle = element_text(hjust = .5),
+        plot.caption = element_text(hjust = .3))
+```
+
+Two graphs, a faceted histogram and a line graph, were created for optimal comparison. The graphs reflect a decrease in the urchin population since 2008. However, the intense drop in 2020 may likely be due to a lack in data. Data stops on February 11th, near the start of Covid-19 in which the project was likely shut down for a period of time. As such the data may not be reflective of actual conditions. Another factor to consider is that the treatment on each site was ignored. We did not separate the controls, where kelp was not removed, and the annuals where kelp was removed. To determine accurate representations of the changes in counts of purple sea urchins, we would need to separate these two treatments. Overall decreases in purple sea urchin populations could also be attributed to sampling error or other environmental factors.
